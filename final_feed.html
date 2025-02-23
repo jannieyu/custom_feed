@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History Feed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .card h2 {
+            margin: 0 0 10px;
+            font-size: 20px;
+        }
+        .card a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .card p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .date {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .property {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 5px;
+        }
+
+        .property-key {
+            font-weight: bold;
+            margin-right: 10px;
+            min-width: 100px;
+        }
+
+        .property-value {
+            font-size: 14px;
+        }
+
+        .date-section {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .retrieved-date {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="feed"></div>
+
+    <script>
+        // async function loadHistory() {
+        //     try {
+        //         const response = await fetch('history.json');
+        //         const data = await response.json();
+        //         console.log(data)
+        //         const feed = document.getElementById('feed');
+                
+        //         data.forEach(item => {
+        //             console.log(item)
+        //             const card = document.createElement('div');
+        //             card.className = 'card';
+        //             card.innerHTML = `
+        //                 <h2><a href="${item.link}" target="_blank">${item.title}</a></h2>
+        //                 <div class="property"><div class="property-key"> Description: </div><div class="property-value">${item.description}</div></div>
+        //                 <div class="property"><div class="property-key"> Description: </div><div class="property-value">${item.description}</div></div>
+        //                 <p>Retrieved date: ${item.retrievedDate}</p>
+        //                 <p class="date">Published on: ${new Date(item.pubDate).toLocaleString()}</p>
+        //             `;
+        //             feed.appendChild(card);
+        //         });
+        //     } catch (error) {
+        //         console.error('Error loading history:', error);
+        //     }
+        // }
+
+        async function loadHistory() {
+            try {
+                const response = await fetch('history.json');
+                const data = await response.json();
+                console.log(data);
+                
+                const feed = document.getElementById('feed');
+                feed.innerHTML = ''; // Clear existing content
+
+                // Group items by retrievedDate
+                const groupedData = {};
+                data.forEach(item => {
+                    if (!groupedData[item.retrievedDate]) {
+                        groupedData[item.retrievedDate] = [];
+                    }
+                    groupedData[item.retrievedDate].push(item);
+                });
+
+                // Render grouped items
+                Object.keys(groupedData).forEach(date => {
+                    const dateSection = document.createElement('div');
+                    dateSection.className = 'date-section';
+                    dateSection.innerHTML = `<h2 class="retrieved-date">Retrieved Date: ${date}</h2>`;
+
+                    groupedData[date].forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
+                            <h2><a href="${item.link}" target="_blank">${item.title}</a></h2>
+                            <div class="property">
+                                <div class="property-key"> Description: </div>
+                                <div class="property-value">${item.description}</div>
+                            </div>
+                            <div class="property">
+                                <div class="property-key"> Source: </div>
+                                <div class="property-value">${item.source}</div>
+                            </div>
+                            <p class="date">Published on: ${new Date(item.pubDate).toLocaleString()}</p>
+                        `;
+                        dateSection.appendChild(card);
+                    });
+
+                    feed.appendChild(dateSection);
+                });
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        loadHistory();
+    </script>
+</body>
+</html>
